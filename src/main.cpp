@@ -43,7 +43,7 @@ int main() {
     std::thread writerThread(packetWriter, std::ref(outputFile), std::ref(packetQueue), std::ref(queueMutex), std::ref(cv), std::ref(done));
 
     // Start reader thread
-    std::thread readerThread(packetReader, std::ref(packetQueue), std::ref(queueMutex), std::ref(cv), std::ref(done));
+    std::thread readerThread(packetReader, std::ref(fileName), std::ref(queueMutex), std::ref(cv), std::ref(done));
 
     // Buffer for incoming data
     char buffer[65535];
@@ -52,7 +52,11 @@ int main() {
     IPV4_HDR* ip_hdr;
     int packetSize;
 
-    while (true) {
+    // Record start time
+    auto startTime = std::chrono::steady_clock::now();
+    auto endTime = startTime + std::chrono::minutes(2); // Two minutes duration
+
+    while (std::chrono::steady_clock::now() < endTime) {
         if (receivePacket(sock, buffer, sizeof(buffer), src_ip, dest_ip, ip_hdr, packetSize)) {
             std::vector<char> packet(buffer, buffer + packetSize);
 
@@ -83,6 +87,17 @@ int main() {
 
     writerThread.join();
     readerThread.join();
+
+    // Output remaining content from the file
+    std::ifstream inputFile(fileName, std::ios::binary);
+    if (inputFile) {
+        std::cout << "Output from file after 2 minutes:\n";
+        std::cout << inputFile.rdbuf() << std::endl;
+        inputFile.close();
+    }
+    else {
+        std::cerr << "Failed to open input file" << std::endl;
+    }
 
     closesocket(sock);
     WSACleanup();

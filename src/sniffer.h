@@ -1,14 +1,20 @@
 #ifndef SNIFFER_H
 #define SNIFFER_H
 
-#include <winsock2.h>
-#include <ws2tcpip.h>
+#include <iostream>
 #include <fstream>
+#include <iomanip>
+#include <sstream>
 #include <string>
+#include <vector>
+#include <regex>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
 #include <queue>
+
+#include <winsock2.h>
+#include <ws2tcpip.h>
 
 #pragma comment(lib, "ws2_32.lib") // Link with the Ws2_32.lib library
 
@@ -34,6 +40,23 @@ SOCKET createRawSocket();
 bool bindSocket(SOCKET sock);
 
 void packetWriter(std::ofstream& outputFile, std::queue<std::pair<std::vector<char>, std::string>>& packetQueue, std::mutex& queueMutex, std::condition_variable& cv, bool& done);
-void packetReader(std::queue<std::pair<std::vector<char>, std::string>>& packetQueue, std::mutex& queueMutex, std::condition_variable& cv, bool& done);
+void packetReader(const std::string&, std::mutex& queueMutex, std::condition_variable& cv, bool& done);
+
+
+struct Packet {
+    std::string time;
+    std::string src;
+    std::string dst;
+    std::string ttl;
+    std::string type;
+    std::string size;
+    std::string data;
+};
+
+std::string get_field(const Packet& packet, int column);
+void clear_screen();
+void display_packets(const std::vector<Packet>& packets, const std::string& filter, int filter_column, int start_index, int max_display);
+std::vector<Packet> read_packets_from_file(const std::string& filename);
+
 
 #endif // SNIFFER_H
