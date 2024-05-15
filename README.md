@@ -1,1 +1,17 @@
-# SimpleNetworkTrafficSniffer
+﻿# SimpleNetworkTrafficSniffer
+
+## Описание проекта
+
+[SimpleNetworkTrafficSniffer](https://github.com/DumDereDum/SimpleNetworkTrafficSniffer) - это проект, направленный на создание простого сниффера сетевого трафика.
+
+
+## Реализованные функции
+
+- **Сниффер трафика**: Перехват и анализ сетевых пакетов.
+- **Реалтайм обновление**: Обновление данных в режиме реального времени.
+- **Запись в файл и параллельное чтение**: Все данные записываются в файл, что позволяет производить запись и анализ параллельно.
+- **Фильтр по IP и другим столбцам**: Возможность фильтрации сетевых пакетов по IP-адресу и другим параметрам для удобства анализа.
+
+## Пример работы
+
+![Пример работы SimpleNetworkTrafficSniffer](https://github.com/DumDereDum/SimpleNetworkTrafficSniffer/blob/main/demo.gif)
