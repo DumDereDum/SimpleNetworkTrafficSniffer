@@ -15,3 +15,8 @@
 ## Пример работы
 
 ![Пример работы SimpleNetworkTrafficSniffer](https://github.com/DumDereDum/SimpleNetworkTrafficSniffer/blob/main/demo.gif)
+
+## В дальнейшем можно сделать:
+* нормальный декод трафика и анализ самого трафика
+* допилить интерфейс
+* поддержка линукса
