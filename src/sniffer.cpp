@@ -5,7 +5,7 @@
 #include <ctime>
 #include <sstream>
 
-void writePacketToFile(std::ofstream& outputFile, const char* buffer, int size, const char* src_ip, const char* dest_ip, const IPV4_HDR* ip_hdr) {
+void writePacketToFile(std::ofstream& outputFile, const std::vector<char>& packet, const char* src_ip, const char* dest_ip, const IPV4_HDR* ip_hdr) {
     auto now = std::chrono::system_clock::now();
     std::time_t now_c = std::chrono::system_clock::to_time_t(now);
     struct tm local_time;
@@ -18,7 +18,7 @@ void writePacketToFile(std::ofstream& outputFile, const char* buffer, int size, 
     outputFile << (int)ip_hdr->ip_ttl << " ";
     outputFile << (int)ip_hdr->ip_protocol << " ";
     outputFile << ip_hdr->ip_total_length << " ";
-    outputFile.write(buffer, size);
+    outputFile.write(packet.data(), packet.size());
     outputFile << std::endl;
 }
 
@@ -85,4 +85,50 @@ bool bindSocket(SOCKET sock) {
         return false;
     }
     return true;
+}
+
+void packetWriter(std::ofstream& outputFile, std::queue<std::pair<std::vector<char>, std::string>>& packetQueue, std::mutex& queueMutex, std::condition_variable& cv, bool& done) {
+    while (!done || !packetQueue.empty()) {
+        std::unique_lock<std::mutex> lock(queueMutex);
+        cv.wait(lock, [&]() { return !packetQueue.empty() || done; });
+
+        while (!packetQueue.empty()) {
+            auto packetData = packetQueue.front();
+            packetQueue.pop();
+            lock.unlock();
+
+            // Extract packet and info
+            auto packet = packetData.first;
+            auto info = packetData.second;
+
+            // Write packet to file
+            outputFile << info << " ";
+            outputFile.write(packet.data(), packet.size());
+            outputFile << std::endl;
+
+            lock.lock();
+        }
+    }
+}
+
+void packetReader(std::queue<std::pair<std::vector<char>, std::string>>& packetQueue, std::mutex& queueMutex, std::condition_variable& cv, bool& done) {
+    while (!done || !packetQueue.empty()) {
+        std::unique_lock<std::mutex> lock(queueMutex);
+        cv.wait(lock, [&]() { return !packetQueue.empty() || done; });
+
+        while (!packetQueue.empty()) {
+            auto packetData = packetQueue.front();
+            packetQueue.pop();
+            lock.unlock();
+
+            // Extract packet and info
+            auto packet = packetData.first;
+            auto info = packetData.second;
+
+            // Print packet info to console
+            std::cout << info << std::endl;
+
+            lock.lock();
+        }
+    }
 }

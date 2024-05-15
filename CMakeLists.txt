@@ -10,3 +10,5 @@ add_executable(RawSocketProject ${SOURCE_FILES})
 
 target_include_directories(RawSocketProject PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(RawSocketProject ws2_32)
+find_package(Threads REQUIRED)
+target_link_libraries(RawSocketProject Threads::Threads)
